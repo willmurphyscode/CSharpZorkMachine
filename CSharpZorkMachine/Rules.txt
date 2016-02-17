@@ -1,0 +1,19 @@
+﻿
+Principle #1: The entire program will, as much as possible, be written in a purely functional, side-effect-free style…
+
+How I plan to take this functional programming principle into C#?
+Objects will be short lived and, as far as possible, just be bundles of stateless method calls. 
+
+Principle #2: Embrace small code. Abstraction encourages clarity. 
+No computation is too small to be put into a helper function. 
+No expression is too simple to be given a name.
+Small code is more easily seen to be obviously correct.
+
+How I plan to do this in C#?
+I think this principle applies just as well in C# anyway. 
+
+Principle #3: Use “naked” primitive types like integers and bools as little as possible. 
+Use the type system to both express meaning and provide evidence of correctness.
+
+How do I plan to apply this in C#? By making lots of semantically-distinct immutable structs that wrap 
+ints and chars and bytes. 
