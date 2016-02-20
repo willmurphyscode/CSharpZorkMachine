@@ -10,8 +10,25 @@ namespace CSharpZorkMachine
     {
         static void Main(string[] args)
         {
-            TestBitTwiddling();
+            //TestBitTwiddling();
+            //char[] helloWorld = "hello world!".ToCharArray();
+            TestMemoryBase();
+        }
 
+        private static void TestMemoryBase()
+        {
+            byte[] bytes = new byte[12];
+            Random rand = new Random();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = (byte)rand.Next(256);
+            }
+            ImmutableByteWrapper initialState = new ImmutableByteWrapper(bytes);
+            ByteAddress address1 = new ByteAddress(1);
+            ImmutableByteWrapper edited = initialState.WriteToAddress(address1, 0x00);
+            Console.WriteLine(edited.ReadAddress(address1));
+            Console.WriteLine(initialState.ReadAddress(address1));
+            Console.ReadKey();
         }
 
         private static void TestBitTwiddling()
