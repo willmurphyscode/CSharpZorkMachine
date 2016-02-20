@@ -24,7 +24,7 @@ namespace CSharpZorkMachine
             this.edits = new Dictionary<ByteAddress, byte>();
         }
 
-        private bool IsInRange(ByteAddress address)
+        public bool IsInRange(ByteAddress address)
         {
             return 0 <= address.Value && address.Value < InitialState.Length;
         }
@@ -65,6 +65,13 @@ namespace CSharpZorkMachine
                 return this.edits[address];
             }
             return this.InitialState[address.Value];
+        }
+        public byte this[ByteAddress address]
+        {
+            get
+            {
+                return this.ReadAddress(address);
+            }
         }
 
         private void ValidateAddress(ByteAddress address)
