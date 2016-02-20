@@ -14,5 +14,15 @@ namespace CSharpZorkMachine
             short retval = (short)(word.Value >> (high.Value - length.Size + 1) & mask);
             return retval;
         }
+
+        public static ByteAddress AddressOfHighByte(WordAddress address)
+        {
+            return new ByteAddress(address.Value);
+        }
+
+        public static ByteAddress AddressOfLowByte(WordAddress address)
+        {
+            return new ByteAddress(address.Value + 1);
+        }
     }
 }
