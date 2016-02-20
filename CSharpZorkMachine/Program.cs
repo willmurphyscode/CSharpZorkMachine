@@ -17,18 +17,38 @@ namespace CSharpZorkMachine
 
         private static void TestMemoryBase()
         {
-            byte[] bytes = new byte[12];
-            Random rand = new Random();
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                bytes[i] = (byte)rand.Next(256);
-            }
+            byte[] bytes = Encoding.UTF8.GetBytes("Hello World");
             ImmutableByteWrapper initialState = new ImmutableByteWrapper(bytes);
             ByteAddress address1 = new ByteAddress(1);
             ImmutableByteWrapper edited = initialState.WriteToAddress(address1, 0x00);
+            //owerwrite "world"
+            byte[] newBytes = Encoding.UTF8.GetBytes("woid!");
+            IEnumerable<int> sixThruTen = Enumerable.Range(6, 5);
+            var multiEdits = sixThruTen.Select(val =>
+            {
+                var address = new ByteAddress(val);
+                var toWrite = newBytes[val - 6];
+                return new Tuple<ByteAddress, byte>(address, toWrite);
+            });
+            ImmutableByteWrapper bulkEdits = initialState.WriteMultipleAddress(multiEdits);
+            var toPrint = ReadAsUtf8String(bulkEdits);
+            var oldToPrint = ReadAsUtf8String(initialState);
+            Console.WriteLine($"Initial state has {oldToPrint} and bulk edited has {toPrint}");
+
+            int length = initialState.Length;
             Console.WriteLine(edited.ReadAddress(address1));
             Console.WriteLine(initialState.ReadAddress(address1));
             Console.ReadKey();
+        }
+
+        private static string ReadAsUtf8String(ImmutableByteWrapper bulkEdits)
+        {
+            byte[] asRead = new byte[bulkEdits.Length];
+            for (int i = 0; i < bulkEdits.Length; i++)
+            {
+                asRead[i] = bulkEdits.ReadAddress(new ByteAddress(i));
+            }
+            return Encoding.UTF8.GetString(asRead);
         }
 
         private static void TestBitTwiddling()
