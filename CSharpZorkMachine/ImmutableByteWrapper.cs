@@ -44,6 +44,19 @@ namespace CSharpZorkMachine
 
             return retval;
         }
+
+        public ImmutableByteWrapper WriteMultipleAddress(IEnumerable<Tuple<ByteAddress, byte>> writes)
+        {
+            ImmutableByteWrapper retval = new ImmutableByteWrapper();
+            retval.InitialState = this.InitialState;
+            retval.edits = new Dictionary<ByteAddress, byte>(this.edits);
+            foreach(var toWrite in writes)
+            {
+                ValidateAddress(toWrite.Item1);
+                retval.edits[toWrite.Item1] = toWrite.Item2;
+            }
+            return retval;
+        }
         
         public byte ReadAddress(ByteAddress address)
         {
@@ -61,7 +74,7 @@ namespace CSharpZorkMachine
                 throw new IndexOutOfRangeException();
             }
         }
-
+        public int Length { get { return this.InitialState.Length; }  }
 
     }
 }
