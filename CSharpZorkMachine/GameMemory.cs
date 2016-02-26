@@ -11,7 +11,10 @@ namespace CSharpZorkMachine
     {
         private int lengthOfDynamicState;
         private ImmutableArray<byte> staticMemory;
-        private ImmutableByteWrapper dynamicState; 
+        private ImmutableByteWrapper dynamicState;
+
+        private const int headerSize = 64;
+        private static readonly WordAddress baseOffset = new WordAddress(14);
 
         public GameMemory(byte[] staticMemory, ImmutableByteWrapper dynamicState)
         {
@@ -87,6 +90,34 @@ namespace CSharpZorkMachine
             byte low = (byte)(bytes & 0xFF);
             this.WriteByte(Bits.AddressOfHighByte(wordAddress), high);
             this.WriteByte(Bits.AddressOfLowByte(wordAddress), low);
+        }
+
+        private static byte[] ReadFile(string filename)
+        {
+            return System.IO.File.ReadAllBytes(filename);
+        }
+
+        public static GameMemory OpenFile(string filename)
+        {
+            byte[] file = ReadFile(filename);
+            int length = file.Length;
+            if(length < headerSize)
+            {
+                throw new ArgumentException($"{filename} is not a valid story file"); 
+            }
+            ImmutableByteWrapper wrapper = new ImmutableByteWrapper(file);
+            byte high = wrapper.ReadAddress(Bits.AddressOfHighByte(baseOffset));
+            byte low = wrapper.ReadAddress(Bits.AddressOfLowByte(baseOffset));
+            int dynamicSegmentLength = (256 * high) + low; 
+            if(dynamicSegmentLength > length)
+            {
+                throw new ArgumentException($"{filename} is not a valid story file");
+            }
+            byte[] dynamicPart = new byte[dynamicSegmentLength];
+            Array.Copy(file, dynamicPart, dynamicSegmentLength);
+            byte[] staticPart = new byte[length - dynamicSegmentLength];
+            Array.Copy(file, dynamicSegmentLength, staticPart, 0, length - dynamicSegmentLength);
+            return new GameMemory(staticPart, new ImmutableByteWrapper(dynamicPart)); 
         }
 
 
