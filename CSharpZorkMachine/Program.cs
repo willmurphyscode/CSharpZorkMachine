@@ -27,8 +27,9 @@ namespace CSharpZorkMachine
             GameMemory gameState = new GameMemory(immutablePart, changingPart);
 
             WordAddress zeroPointer = new WordAddress(0);
-            IEnumerable<WordAddress> firstFivePointers = Enumerable.Range(0, 5)
-                .Select(el => zeroPointer + el);
+            List<WordAddress> firstFivePointers = Enumerable.Range(0, 5)
+                .Select(el => zeroPointer + el)
+                .ToList();
 
             IEnumerable<ByteAddress> firstTenByteAddress = Enumerable.Range(0, 10)
                 .Select(el => new ByteAddress(el));
@@ -68,10 +69,25 @@ namespace CSharpZorkMachine
                 .Select(p => gameState.ReadAddress(p))
                 .ToArray();
 
-            string mutated = new string(Encoding.UTF8.GetChars(firstTenBytesAgain)); 
+            string mutated = new string(Encoding.UTF8.GetChars(firstTenBytesAgain));
 
+            //test writing Words instead of bytes to game state:
+            byte[] toWriteWordWise = Encoding.UTF8.GetBytes("aaZZeess33");
+            WordAddress zero = new WordAddress(0); 
+            for(int i = 0; i < toWriteWordWise.Length - 1; i += 2)
+            {
+                int val = (toWriteWordWise[i] * 256 + toWriteWordWise[i + 1]);
+                WordAddress address = zero + i / 2; 
+                gameState.WriteWord(address, new Word(val));
+            }
+             
+            byte[] firstTenBytesAgain2 = firstTenByteAddress
+                .Select(p => gameState.ReadAddress(p))
+                .ToArray();
 
-            Console.WriteLine($"{whatIRead} became {mutated}");
+            string mutated2 = new string(Encoding.UTF8.GetChars(firstTenBytesAgain2)); 
+
+            Console.WriteLine($"{whatIRead} became {mutated} and then {mutated2}");
             
         }
 
