@@ -10,9 +10,69 @@ namespace CSharpZorkMachine
     {
         static void Main(string[] args)
         {
-            //TestBitTwiddling();
-            //char[] helloWorld = "hello world!".ToCharArray();
             TestMemoryBase();
+            TestReadingAndWritingGameState();
+            Console.ReadKey();
+        }
+
+        private static void TestReadingAndWritingGameState()
+        {
+            string storyState = "Listen to a story 'bout a guy named Al";
+            string interpreterState = "Who lived in the sewer with his hamster pal";
+            int expectedImmutableSize = Encoding.UTF8.GetByteCount(storyState);
+            byte[] immutablePart = Encoding.UTF8.GetBytes(storyState);
+            int expectedDynamicSize = Encoding.UTF8.GetByteCount(interpreterState);
+            byte[] dynamicPart = Encoding.UTF8.GetBytes(interpreterState);
+            ImmutableByteWrapper changingPart = new ImmutableByteWrapper(dynamicPart);
+            GameMemory gameState = new GameMemory(immutablePart, changingPart);
+
+            WordAddress zeroPointer = new WordAddress(0);
+            IEnumerable<WordAddress> firstFivePointers = Enumerable.Range(0, 5)
+                .Select(el => zeroPointer + el);
+
+            IEnumerable<ByteAddress> firstTenByteAddress = Enumerable.Range(0, 10)
+                .Select(el => new ByteAddress(el));
+
+            byte[] firstTenBytes = firstTenByteAddress
+                .Select(p => gameState.ReadAddress(p))
+                .ToArray();
+
+            byte[] firstFiveWords = firstFivePointers
+                 .Select(p => gameState.ReadWord(p))
+                 .SelectMany(word => new byte[] { (byte)(word.Value & 0xFF), (byte)((word.Value >> 8) & 0xFF) })
+                 .ToArray();
+
+            string firstFive = new string(Encoding.UTF8.GetChars(firstFiveWords));
+
+            byte[] firstFiveTransposed = firstFivePointers
+                .Select(p => gameState.ReadWord(p))
+                .SelectMany(word => new byte[] { (byte)((word.Value >> 8) & 0xFF), (byte)(word.Value & 0xFF) })
+                .ToArray();
+
+            string firstFiveTransposedRead = new string(Encoding.UTF8.GetChars(firstFiveTransposed));
+
+            string whatIRead = new String(Encoding.UTF8.GetChars(firstTenBytes));
+
+            //test writing to game state:
+            //replace "Who lived " with
+            //        "zzCheese2 " 
+            byte[] toWrite = Encoding.UTF8.GetBytes("zzCheese2 ");
+            System.Diagnostics.Debug.Assert(toWrite.Length == firstTenBytes.Length);
+
+            Enumerable.Range(0, 10)
+                .Select(el => new { address = new ByteAddress(el), val = toWrite[el] })
+                .ToList()
+                .ForEach(item => gameState.WriteByte(item.address, item.val));
+
+            byte[] firstTenBytesAgain = firstTenByteAddress
+                .Select(p => gameState.ReadAddress(p))
+                .ToArray();
+
+            string mutated = new string(Encoding.UTF8.GetChars(firstTenBytesAgain)); 
+
+
+            Console.WriteLine($"{whatIRead} became {mutated}");
+            
         }
 
         private static void TestMemoryBase()
@@ -38,7 +98,6 @@ namespace CSharpZorkMachine
             int length = initialState.Length;
             Console.WriteLine(edited.ReadAddress(address1));
             Console.WriteLine(initialState.ReadAddress(address1));
-            Console.ReadKey();
         }
 
         private static string ReadAsUtf8String(ImmutableByteWrapper bulkEdits)
