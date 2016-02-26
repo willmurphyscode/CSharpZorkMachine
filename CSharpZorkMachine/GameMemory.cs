@@ -83,7 +83,7 @@ namespace CSharpZorkMachine
         public void WriteWord(WordAddress wordAddress, Word toWrite)
         {
             short bytes = toWrite.Value;
-            byte high = (byte)((bytes << 8) & 0xFF);
+            byte high = (byte)((bytes >> 8) & 0xFF);
             byte low = (byte)(bytes & 0xFF);
             this.WriteByte(Bits.AddressOfHighByte(wordAddress), high);
             this.WriteByte(Bits.AddressOfLowByte(wordAddress), low);
