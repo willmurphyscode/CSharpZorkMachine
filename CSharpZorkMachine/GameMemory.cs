@@ -57,6 +57,15 @@ namespace CSharpZorkMachine
             }
 
         }
+        public Word ReadWord(WordAddress address)
+        {
+            ByteAddress highByteAddress = Bits.AddressOfHighByte(address);
+            ByteAddress lowByteAddress = Bits.AddressOfLowByte(address);
+            byte high = ReadAddress(highByteAddress);
+            byte low = ReadAddress(lowByteAddress);
+
+            return new Word((256 * high) + low); 
+        }
 
 
         public byte this[ByteAddress address]
@@ -65,6 +74,19 @@ namespace CSharpZorkMachine
             {
                 return this.ReadAddress(address);
             }
+        }
+
+        public void WriteByte(ByteAddress address, byte toWrite)
+        {
+            this.dynamicState = this.dynamicState.WriteToAddress(address, toWrite); 
+        }
+        public void WriteWord(WordAddress wordAddress, Word toWrite)
+        {
+            short bytes = toWrite.Value;
+            byte high = (byte)((bytes << 8) & 0xFF);
+            byte low = (byte)(bytes & 0xFF);
+            this.WriteByte(Bits.AddressOfHighByte(wordAddress), high);
+            this.WriteByte(Bits.AddressOfLowByte(wordAddress), low);
         }
 
 
