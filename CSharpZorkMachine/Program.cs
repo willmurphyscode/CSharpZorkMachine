@@ -12,13 +12,23 @@ namespace CSharpZorkMachine
         {
             TestMemoryBase();
             TestReadingAndWritingGameState();
-            string pathToMiniZork = @"..\..\..\minizork.z3"; 
+            string pathToMiniZork = @"..\..\..\minizork.z3";
+            TestReadVersionNumberFromFile(pathToMiniZork);
+
+            Word mightBeTerminal = new Word(65535 / 2 + 1);
+            string binary = Convert.ToString(65535 / 2 + 1, 2);
+            Console.WriteLine(mightBeTerminal.IsTerminal());
+            Console.WriteLine(binary);
+
+            Console.ReadKey();
+        }
+
+        private static void TestReadVersionNumberFromFile(string pathToMiniZork)
+        {
             GameMemory miniZork = GameMemory.OpenFile(pathToMiniZork);
             ByteAddress versionAddress = new ByteAddress(0);
             byte versionNumber = miniZork.ReadAddress(versionAddress);
             Console.WriteLine($"Mini-Zork version {versionNumber}");
-
-            Console.ReadKey();
         }
 
         private static void TestReadingAndWritingGameState()

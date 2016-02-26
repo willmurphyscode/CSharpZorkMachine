@@ -16,6 +16,11 @@ namespace CSharpZorkMachine
 
         public short Value { get { return (short)this.value; } }
 
+        public bool IsTerminal()
+        {
+            short lastBit = Bits.FetchBits(BitNumber.Bit15, BitSize.Size1, this);
+            return lastBit != 0;
+        }
 
     }
 }
