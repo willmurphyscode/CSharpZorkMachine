@@ -20,5 +20,9 @@ namespace CSharpZorkMachine
         {
             return new WordAddress(address.Value + (WordSize * offset)); 
         }
+        public static WordAddress operator -(WordAddress address, int offset)
+        {
+            return address + (0 - offset);
+        }
     }
 }
