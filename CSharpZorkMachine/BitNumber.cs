@@ -15,6 +15,7 @@ namespace CSharpZorkMachine
         }
         public int Value { get { return this.value; } }
 
+        public static readonly BitNumber Bit0 = new BitNumber(0);
         public static readonly BitNumber Bit1 =  new BitNumber(1);
         public static readonly BitNumber Bit2 =  new BitNumber(2);
         public static readonly BitNumber Bit3 =  new BitNumber(3);
@@ -30,6 +31,5 @@ namespace CSharpZorkMachine
         public static readonly BitNumber Bit13 = new BitNumber(13);
         public static readonly BitNumber Bit14 = new BitNumber(14);
         public static readonly BitNumber Bit15 = new BitNumber(15);
-        public static readonly BitNumber Bit16 = new BitNumber(16);
     }
 }
