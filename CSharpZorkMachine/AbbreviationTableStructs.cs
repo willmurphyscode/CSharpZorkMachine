@@ -99,6 +99,20 @@ namespace CSharpZorkMachine
         }
         public int Value { get { return this.value; } }
     }
+    public struct Zchar
+    {
+        private int value;
+        public Zchar(int value)
+        {
+            this.value = value;
+        }
+        public int Value { get { return this.value; } }
+        public static string PrintFromZchar(IEnumerable<Zchar> chars)
+        {
+            byte[] values = chars.Select(ch => (byte)ch.Value).ToArray();
+            return new string(Encoding.ASCII.GetChars(values));
+        }
+    }
 
 
 }

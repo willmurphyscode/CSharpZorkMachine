@@ -24,5 +24,22 @@ namespace CSharpZorkMachine
         {
             return new ByteAddress(address.Value + 1);
         }
+        public static List<Zchar> ReadStringFromAddress(WordAddress address, GameMemory memory)
+        {
+            List<Zchar> retval = new List<Zchar>();
+            Word word = memory.ReadWord(address);
+            while(!word.IsTerminal())
+            {
+                Zchar char1 = new Zchar(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word));
+                Zchar char2 = new Zchar(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word));
+                Zchar char3 = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
+                retval.Add(char1);
+                retval.Add(char2);
+                retval.Add(char3);
+                WordAddress newAddress = address + 1;
+                word = memory.ReadWord(newAddress);
+            }
+            return retval;
+        }
     }
 }
