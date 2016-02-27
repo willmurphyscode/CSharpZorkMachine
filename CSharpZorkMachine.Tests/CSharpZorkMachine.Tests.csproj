@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestAbbreviationTableStructs.cs" />
     <Compile Include="TestWord.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -79,4 +79,26 @@ namespace CSharpZorkMachine
         }
         public int Value { get { return this.value; } }
     }
+
+    public struct AbbreviationZstring
+    {
+        private int value;
+        public AbbreviationZstring(int value)
+        {
+            this.value = value;
+        }
+        public int Value { get { return this.value; } }
+    }
+
+    public struct WordZstring
+    {
+        private int value;
+        public WordZstring(int value)
+        {
+            this.value = value;
+        }
+        public int Value { get { return this.value; } }
+    }
+
+
 }

@@ -15,10 +15,18 @@ namespace CSharpZorkMachine
             string pathToMiniZork = @"..\..\..\minizork.z3";
             TestReadVersionNumberFromFile(pathToMiniZork);
 
+            GameMemory miniZork = GameMemory.OpenFile(pathToMiniZork);
+
+            WordAddress ptrToAbbrevTable = AbbreviationTableBase.addressOfAbbreviationTable(miniZork);
+            Console.WriteLine($"Abbreviation table at {ptrToAbbrevTable.Value.ToString("X")}");
+
+
             Word mightBeTerminal = new Word(65535 / 2 + 1);
             string binary = Convert.ToString(65535 / 2 + 1, 2);
             Console.WriteLine(mightBeTerminal.IsTerminal());
             Console.WriteLine(binary);
+
+            
 
             Console.ReadKey();
         }
