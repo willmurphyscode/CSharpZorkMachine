@@ -36,8 +36,8 @@ namespace CSharpZorkMachine
                 retval.Add(char1);
                 retval.Add(char2);
                 retval.Add(char3);
-                WordAddress newAddress = address + 1;
-                word = memory.ReadWord(newAddress);
+                address = address + 1; 
+                word = memory.ReadWord(address);
             }
             return retval;
         }

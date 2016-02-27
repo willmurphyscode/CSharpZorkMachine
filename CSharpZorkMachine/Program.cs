@@ -18,6 +18,13 @@ namespace CSharpZorkMachine
             GameMemory miniZork = GameMemory.OpenFile(pathToMiniZork);
 
             WordAddress ptrToAbbrevTable = AbbreviationTableBase.addressOfAbbreviationTable(miniZork);
+            List<Zchar> fromZeroAbbrev = Bits.ReadStringFromAddress(ptrToAbbrevTable, miniZork);
+            List<Zchar> from4Abbrev = Bits.ReadStringFromAddress(ptrToAbbrevTable + 4, miniZork);
+
+            Console.WriteLine(Zchar.PrintFromZchar(fromZeroAbbrev));
+            Console.WriteLine(Zchar.PrintFromZchar(from4Abbrev));
+
+
             Console.WriteLine($"Abbreviation table at {ptrToAbbrevTable.Value.ToString("X")}");
 
 
