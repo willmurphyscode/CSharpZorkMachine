@@ -11,15 +11,24 @@ namespace CSharpZorkMachine.Tests
     public class TestWord
     {
         [Fact]
-        public void WordDotIsTerminalReturnsCorrectValue()
+        public void WordAllOnesIsTerminal()
         {
-            Word noTerminal = new Word(0);
             Word terminal = new Word(~0);
-            Word onlyTerminalBitSet = new Word(65535 / 2 + 1);
-
             Assert.True(terminal.IsTerminal());
+
+        }
+        [Fact]
+        public void SettingOnlyTerminalBitMakesTerminalWord()
+        {
+            Word onlyTerminalBitSet = new Word(1);
             Assert.True(onlyTerminalBitSet.IsTerminal());
-            Assert.True(!noTerminal.IsTerminal());
+        }
+
+        [Fact]
+        public void ZeroIsNotATerminalWord()
+        {
+            Word nonTerminal = new Word(0);
+            Assert.False(nonTerminal.IsTerminal());
         }
     }
 }
