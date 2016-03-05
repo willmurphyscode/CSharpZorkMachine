@@ -8,10 +8,10 @@ namespace CSharpZorkMachine
 {
     public static class Bits
     {
-        public static short FetchBits(BitNumber high, BitSize length, Word word)
+        public static int FetchBits(BitNumber high, BitSize length, Word word)
         {
-            short mask = (short) ~(-1 << length.Size);
-            short retval = (short)(word.Value >> (high.Value - length.Size + 1) & mask);
+            int mask = ~(-1 << length.Size);
+            int retval = (word.Value >> (high.Value - length.Size + 1)) & mask;
             return retval;
         }
 
@@ -29,10 +29,10 @@ namespace CSharpZorkMachine
             List<Zchar> retval = new List<Zchar>();
             Word word = memory.ReadWord(address);
             while(!word.IsTerminal())
-            {
-                Zchar char1 = new Zchar(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word));
-                Zchar char2 = new Zchar(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word));
-                Zchar char3 = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
+            {          
+                Zchar char1 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word)));
+                Zchar char2 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word)));
+                Zchar char3 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word)));
                 retval.Add(char1);
                 retval.Add(char2);
                 retval.Add(char3);
