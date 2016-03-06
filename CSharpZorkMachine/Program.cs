@@ -21,6 +21,13 @@ namespace CSharpZorkMachine
             //19 t 0d h 0a e 00 _ 05 ? 05 ?
             //1e y 14 o 1a u 17 r 00 _ 05 ?
             ReadFromAbbrTable(pathToMiniZork);
+            GameMemory minizork = GameMemory.OpenFile(pathToMiniZork);
+            WordAddress testText = new WordAddress(0xb106);
+            IEnumerable<Zchar> story = Zchar.ReadWordsTillBreak(testText, minizork);
+            char[] toPrint = Zchar.DecodeFromZString(story, minizork).ToArray();
+            string printMe = new string(toPrint);
+            Console.Write(printMe);
+
 
             Console.ReadKey();
         }
@@ -40,7 +47,7 @@ namespace CSharpZorkMachine
                 Console.Write(Zchar.PrintWordAsZchars(word));
                 word = minizork.ReadWord(decompressedAddressOfFirstAbbreviation + abbreviationLenght);
             }
-            WordAddress secondAbbrev = AbbreviationTableBase.AddressOfAbbreviationByNumber(new AbbreviationNumber(2), minizork);
+            WordAddress secondAbbrev = AbbreviationTableBase.AddressOfAbbreviationByNumber(new AbbreviationNumber(1), minizork);
 
             Console.WriteLine();
             word = minizork.ReadWord(secondAbbrev);

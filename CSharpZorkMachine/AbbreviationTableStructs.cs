@@ -133,13 +133,29 @@ namespace CSharpZorkMachine
                     switch(current)
                     {
                         case state.abbr:
-                        case state.abbr32:
-                        case state.abbr64:
-                            throw new NotImplementedException(); 
-                            //TODO insert an entire string dereferenced from the abbreviation table here,
-                            // probably with some horrible, nested state-machine-for-loop
+                            AbbreviationNumber num = new AbbreviationNumber(ch.Value);
+                            foreach (char inner in YieldAbbreviationFromAbbreviationNumber(num ,memory))
+                            {
+                                yield return inner; 
+                            }
+                            current = state.lower;
                             break; 
-                        
+                        case state.abbr32:
+                            num = new AbbreviationNumber(ch.Value + 32);
+                            foreach (char inner in YieldAbbreviationFromAbbreviationNumber(num, memory))
+                            {
+                                yield return inner;
+                            }
+                            current = state.lower;
+                            break;
+                        case state.abbr64:
+                            num = new AbbreviationNumber(ch.Value + 64);
+                            foreach (char inner in YieldAbbreviationFromAbbreviationNumber(num, memory))
+                            {
+                                yield return inner;
+                            }
+                            current = state.lower;
+                            break;
                         case state.lower:
                             yield return Lower[ch.Value];
                             break;
@@ -165,7 +181,7 @@ namespace CSharpZorkMachine
                             continue;
                         case state.ascii2:
                             throw new System.NotImplementedException();
-                            //TODO the previous char and the currnt char
+                            //TODO the previous char and the current char
                             // are combined to make an ascii char
                             // not in the tables. 
                             break; 
@@ -175,17 +191,53 @@ namespace CSharpZorkMachine
                 {
                     switch(ch.Value)
                     {
+                        case 1:
+                            current = state.abbr;
+                            break;
+                        case 2:
+                            current = state.abbr32;
+                            break;
+                        case 3:
+                            current = state.abbr64;
+                            break; 
                         case 4:
                             current = state.upper;
                             break;
                         case 5:
                             current = state.abbr;
                             break;
+                        case 0:
+                            yield return ' ';
+                            break;
+                        default:
+                            throw new ArgumentException("Invalid state.");
                     }
                     continue;
                 }
             }
         }
+        public static IEnumerable<char> YieldAbbreviationFromAbbreviationNumber(AbbreviationNumber number, GameMemory memory)
+        {
+            WordAddress addressOfPtrToAbbrTable = new WordAddress(24);
+            WordAddress ptrToAbbrevTable = new WordAddress(memory.ReadWord(addressOfPtrToAbbrTable).Value);
+            WordAddress address = AbbreviationTableBase.AddressOfAbbreviationByNumber(number, memory);
+            Word word = memory.ReadWord(address);
+            while (true)
+            {
+                char[] firstThree = Zchar.PrintWordAsZchars(word).ToCharArray();
+                foreach (char ch in firstThree)
+                {
+                    yield return ch;
+                }
+                if(word.IsTerminal())
+                {
+                    yield break; 
+                }
+                address = address + 1;
+                word = memory.ReadWord(address);
+            }
+        }
+
         public static string PrintWordAsZchars(Word word)
         {
             Zchar low = new Zchar(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word));
@@ -193,6 +245,27 @@ namespace CSharpZorkMachine
             Zchar high = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
 
             return Zchar.PrintFromZchar(new List<Zchar> { low, mid, high }); 
+        }
+
+        public static IEnumerable<Zchar> ReadWordsTillBreak(WordAddress address, GameMemory memory)
+        {
+            while (true)
+            {
+                Word word = memory.ReadWord(address);
+                Zchar low = new Zchar(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word));
+                Zchar mid = new Zchar(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word));
+                Zchar high = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
+                yield return low;
+                yield return mid;
+                yield return high; 
+                if(word.IsTerminal())
+                {
+                    yield break; 
+                }
+                address = address + 1; 
+            }
+
+
         }
 
         public static string DiagnosticPringFromZchar(IEnumerable<Zchar> chars)
