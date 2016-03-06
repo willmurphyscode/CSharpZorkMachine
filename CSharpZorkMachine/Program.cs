@@ -48,7 +48,7 @@ namespace CSharpZorkMachine
                 word = minizork.ReadWord(decompressedAddressOfFirstAbbreviation + abbreviationLenght);
             }
             WordAddress secondAbbrev = AbbreviationTableBase.AddressOfAbbreviationByNumber(new AbbreviationNumber(1), minizork);
-
+            List<Zchar> wholeSecondAbbrev = Zchar.ReadAbbrevTillBreak(new AbbreviationNumber(2), minizork).ToList();
             Console.WriteLine();
             word = minizork.ReadWord(secondAbbrev);
             int len = 0;

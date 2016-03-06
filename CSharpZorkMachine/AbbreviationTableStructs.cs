@@ -118,7 +118,7 @@ namespace CSharpZorkMachine
             return new string(values);
         }
         
-        public static IEnumerable<char> DecodeFromZString(IEnumerable<Zchar> chars, GameMemory memory)
+        public static IEnumerable<char> DecodeFromZString(IEnumerable<Zchar> chars, GameMemory memory, bool permitRecurse = true)
         {
             //THIS IS the least functional-style code in here. it's so stateful. (well, it's a state machine)
             //another way would be to write a function that 
@@ -134,25 +134,31 @@ namespace CSharpZorkMachine
                     {
                         case state.abbr:
                             AbbreviationNumber num = new AbbreviationNumber(ch.Value);
-                            foreach (char inner in YieldAbbreviationFromAbbreviationNumber(num ,memory))
+                            IEnumerable<Zchar> abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
+                            IEnumerable<char> inner = DecodeFromZString(abbrevs, memory, false).ToList(); 
+                            foreach(char innerChar in inner)
                             {
-                                yield return inner; 
+                                yield return innerChar; 
                             }
-                            current = state.lower;
+                            current = state.lower; 
                             break; 
                         case state.abbr32:
                             num = new AbbreviationNumber(ch.Value + 32);
-                            foreach (char inner in YieldAbbreviationFromAbbreviationNumber(num, memory))
+                            abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
+                            inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            foreach (char innerChar in inner)
                             {
-                                yield return inner;
+                                yield return innerChar;
                             }
                             current = state.lower;
                             break;
                         case state.abbr64:
                             num = new AbbreviationNumber(ch.Value + 64);
-                            foreach (char inner in YieldAbbreviationFromAbbreviationNumber(num, memory))
+                            abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
+                            inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            foreach (char innerChar in inner)
                             {
-                                yield return inner;
+                                yield return innerChar;
                             }
                             current = state.lower;
                             break;
@@ -193,18 +199,30 @@ namespace CSharpZorkMachine
                     {
                         case 1:
                             current = state.abbr;
+                            if(!permitRecurse)
+                            {
+                                yield break; 
+                            }
                             break;
                         case 2:
                             current = state.abbr32;
+                            if (!permitRecurse)
+                            {
+                                yield break;
+                            }
                             break;
                         case 3:
                             current = state.abbr64;
+                            if (!permitRecurse)
+                            {
+                                yield break;
+                            }
                             break; 
                         case 4:
                             current = state.upper;
                             break;
                         case 5:
-                            current = state.abbr;
+                            current = state.symbol;
                             break;
                         case 0:
                             yield return ' ';
@@ -245,6 +263,14 @@ namespace CSharpZorkMachine
             Zchar high = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
 
             return Zchar.PrintFromZchar(new List<Zchar> { low, mid, high }); 
+        }
+
+        public static IEnumerable<Zchar> ReadAbbrevTillBreak(AbbreviationNumber num, GameMemory memory)
+        {
+            WordAddress addressOfPtrToAbbrTable = new WordAddress(24);
+            WordAddress ptrToAbbrevTable = new WordAddress(memory.ReadWord(addressOfPtrToAbbrTable).Value);
+            WordAddress ptrChosenAbbrev = AbbreviationTableBase.AddressOfAbbreviationByNumber(num, memory);
+            return ReadWordsTillBreak(ptrChosenAbbrev, memory);
         }
 
         public static IEnumerable<Zchar> ReadWordsTillBreak(WordAddress address, GameMemory memory)
