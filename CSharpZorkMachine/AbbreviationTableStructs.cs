@@ -30,24 +30,25 @@ namespace CSharpZorkMachine
     public struct AbbreviationTableBase
     {
         private int value;
-        public AbbreviationTableBase(int value)
-        {
-            this.value = value;
-        }
+
         public AbbreviationTableBase(GameMemory memory)
         {
-            //the address of the first word in the table is 
-            //stored at word 24 in the game memory
             WordAddress addrOfTableBasePtr = new WordAddress(24);
-            Word addressOfTableBase = memory.ReadWord(addrOfTableBasePtr);
+            WordAddress addressOfTableBase = new WordAddress(memory.ReadWord(addrOfTableBasePtr).Value);
             this.value = addressOfTableBase.Value;
         }
         public int Value { get { return this.value; } }
 
-        public static WordAddress addressOfAbbreviationTable(GameMemory memory)
+        public static WordAddress AddressOfAbbreviationByNumber(AbbreviationNumber number, GameMemory memory)
         {
-            return new WordAddress(new AbbreviationTableBase(memory).Value);
+            AbbreviationTableBase basePtr = new AbbreviationTableBase(memory);
+            WordAddress addressOfPtrToAbbrTable = new WordAddress(24);
+            WordAddress ptrToAbbrevTable = new WordAddress(memory.ReadWord(addressOfPtrToAbbrTable).Value);
+            WordAddress ptrToChosenAbbrv = ptrToAbbrevTable + ( number.Value * 2);
+            WordAddress decompressedAbbrvPtr = new WordAddress(memory.ReadWord(ptrToChosenAbbrv).Value * 2);
+            return decompressedAbbrvPtr;
         }
+
     }
 
     /// <summary>
@@ -102,6 +103,7 @@ namespace CSharpZorkMachine
     public struct Zchar
     {
         private int value;
+        private static char[] Table = { ' ', '?', '?', '?', '?', '?', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' }; 
         public Zchar(int value)
         {
             this.value = value;
@@ -109,8 +111,26 @@ namespace CSharpZorkMachine
         public int Value { get { return this.value; } }
         public static string PrintFromZchar(IEnumerable<Zchar> chars)
         {
-            byte[] values = chars.Select(ch => (byte)ch.Value).ToArray();
-            return new string(Encoding.ASCII.GetChars(values));
+            char[] values = chars.Select(ch => Table[ch.Value]).ToArray();
+            return new string(values);
+        }
+        public static string PrintWordAsZchars(Word word)
+        {
+            Zchar low = new Zchar(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word));
+            Zchar mid = new Zchar(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word));
+            Zchar high = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
+
+            return Zchar.PrintFromZchar(new List<Zchar> { low, mid, high }); 
+        }
+
+        public static string DiagnosticPringFromZchar(IEnumerable<Zchar> chars)
+        {
+            StringBuilder retval = new StringBuilder();
+            foreach(Zchar ch in chars)
+            {
+                retval.Append($"{ch.Value.ToString("X")} {Table[ch.Value]} |");
+            }
+            return retval.ToString();
         }
     }
 

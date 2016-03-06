@@ -18,7 +18,7 @@ namespace CSharpZorkMachine
 
         public bool IsTerminal()
         {
-            short lastBit = Bits.FetchBits(BitNumber.Bit15, BitSize.Size1, this);
+            int lastBit = Bits.FetchBits(BitNumber.Bit15, BitSize.Size1, this);
             return lastBit != 0;
         }
 

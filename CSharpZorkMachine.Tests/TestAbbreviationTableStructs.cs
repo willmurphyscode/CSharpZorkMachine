@@ -14,9 +14,9 @@ namespace CSharpZorkMachine.Tests
         {
             //19 t 0d h 0a e 00 _ 05 ? 05 ?
             //1e y 14 o 1a u 17 r 00 _ 05 ?
-            Zchar t = new Zchar(new AbbreviationNumber(0x19));
-            Zchar h = new Zchar(new AbbreviationNumber(0x0d));
-            Zchar e = new Zchar(new AbbreviationNumber(0x0a));
+            Zchar t = new Zchar(0x19);
+            Zchar h = new Zchar(0x0d);
+            Zchar e = new Zchar(0x0a);
             List<Zchar> printme = new List<Zchar>
             {
                 t, h, e

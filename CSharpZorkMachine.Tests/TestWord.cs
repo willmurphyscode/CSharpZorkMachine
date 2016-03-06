@@ -20,7 +20,7 @@ namespace CSharpZorkMachine.Tests
         [Fact]
         public void SettingOnlyTerminalBitMakesTerminalWord()
         {
-            Word onlyTerminalBitSet = new Word(1);
+            Word onlyTerminalBitSet = new Word(0x1000);
             Assert.True(onlyTerminalBitSet.IsTerminal());
         }
 

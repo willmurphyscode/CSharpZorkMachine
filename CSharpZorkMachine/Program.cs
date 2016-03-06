@@ -15,27 +15,46 @@ namespace CSharpZorkMachine
             string pathToMiniZork = @"..\..\..\minizork.z3";
             TestReadVersionNumberFromFile(pathToMiniZork);
 
-            GameMemory miniZork = GameMemory.OpenFile(pathToMiniZork);
 
-            WordAddress ptrToAbbrevTable = AbbreviationTableBase.addressOfAbbreviationTable(miniZork);
-            List<Zchar> fromZeroAbbrev = Bits.ReadStringFromAddress(ptrToAbbrevTable, miniZork);
-            List<Zchar> from4Abbrev = Bits.ReadStringFromAddress(ptrToAbbrevTable + 4, miniZork);
+            //TestBitTwiddling();
 
-            Console.WriteLine(Zchar.PrintFromZchar(fromZeroAbbrev));
-            Console.WriteLine(Zchar.PrintFromZchar(from4Abbrev));
-
-
-            Console.WriteLine($"Abbreviation table at {ptrToAbbrevTable.Value.ToString("X")}");
-
-
-            Word mightBeTerminal = new Word(65535 / 2 + 1);
-            string binary = Convert.ToString(65535 / 2 + 1, 2);
-            Console.WriteLine(mightBeTerminal.IsTerminal());
-            Console.WriteLine(binary);
-
-            
+            //19 t 0d h 0a e 00 _ 05 ? 05 ?
+            //1e y 14 o 1a u 17 r 00 _ 05 ?
+            ReadFromAbbrTable(pathToMiniZork);
 
             Console.ReadKey();
+        }
+
+        private static void ReadFromAbbrTable(string pathToMiniZork)
+        {
+            GameMemory minizork = GameMemory.OpenFile(pathToMiniZork);
+            WordAddress addressOfPtrToAbbrTable = new WordAddress(24);
+            WordAddress ptrToAbbrevTable = new WordAddress(minizork.ReadWord(addressOfPtrToAbbrTable).Value);
+            WordAddress decompressedAddressOfFirstAbbreviation = new WordAddress(minizork.ReadWord(ptrToAbbrevTable).Value * 2);
+
+            Word word = minizork.ReadWord(decompressedAddressOfFirstAbbreviation);
+            int abbreviationLenght = 0;
+            while (!word.IsTerminal())
+            {
+                abbreviationLenght++;
+                Console.Write(Zchar.PrintWordAsZchars(word));
+                word = minizork.ReadWord(decompressedAddressOfFirstAbbreviation + abbreviationLenght);
+            }
+            WordAddress secondAbbrev = AbbreviationTableBase.AddressOfAbbreviationByNumber(new AbbreviationNumber(2), minizork);
+
+            Console.WriteLine();
+            word = minizork.ReadWord(secondAbbrev);
+            int len = 0;
+            string accumulator = "";
+            accumulator += Zchar.PrintWordAsZchars(word);
+            while (true)
+            {
+                len++;
+                word = minizork.ReadWord(secondAbbrev + len);
+                accumulator += Zchar.PrintWordAsZchars(word);
+                if (word.IsTerminal()) break; 
+            }
+            Console.WriteLine(accumulator);
         }
 
         private static void TestReadVersionNumberFromFile(string pathToMiniZork)
@@ -163,6 +182,15 @@ namespace CSharpZorkMachine
             int myWord = 0xBEEF;
             int otherWord = 0xF000;
 
+            Word negativeOne = new Word(0xFFFF);
+            Word everyOther = new Word(0 + 2 + 8 + 32 + 128 + 512);
+
+            Console.WriteLine(Print3ZcharsFromWord(negativeOne));
+            Console.WriteLine(Print3ZcharsFromWord(everyOther));
+
+
+
+
             Word word = new Word(myWord);
             Word theOtherWord = new Word(otherWord);
 
@@ -178,7 +206,28 @@ namespace CSharpZorkMachine
 
             Console.WriteLine($"{binary} obtained from {firstBinary}");
             Console.WriteLine($"{secondBinary} obtained from {otherWords}");
-            Console.ReadKey();
+          
+        }
+
+        private static string Print3ZcharsFromWord(Word word)
+        {
+
+            int test1 = Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word);
+            int test2 = Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word);
+            int test3 = Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word);
+
+            string str1 = Convert.ToString(test1, 2);
+            string str2 = Convert.ToString(test2, 2);
+            string str3 = Convert.ToString(test3, 2);
+
+            List<Zchar> chars = new List<Zchar>
+            {
+                new Zchar(test1),
+                new Zchar(test2),
+                new Zchar(test3)
+            };
+
+            return Zchar.PrintFromZchar(chars);
         }
     }
 }

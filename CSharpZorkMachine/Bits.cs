@@ -26,16 +26,17 @@ namespace CSharpZorkMachine
         }
         public static List<Zchar> ReadStringFromAddress(WordAddress address, GameMemory memory)
         {
+            throw new System.NotImplementedException();
             List<Zchar> retval = new List<Zchar>();
             Word word = memory.ReadWord(address);
             while(!word.IsTerminal())
             {          
-                Zchar char1 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word)));
-                Zchar char2 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word)));
-                Zchar char3 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word)));
-                retval.Add(char1);
-                retval.Add(char2);
-                retval.Add(char3);
+                //Zchar char1 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word)));
+                //Zchar char2 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word)));
+                //Zchar char3 = new Zchar(new AbbreviationNumber(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word)));
+                //retval.Add(char1);
+                //retval.Add(char2);
+                //retval.Add(char3);
                 address = address + 1; 
                 word = memory.ReadWord(address);
             }
