@@ -1,5 +1,5 @@
 
-##Zork Machine in C#
+##Zork Machine in C# #
 
 Eric Lippert is writing a wonderful blog series,
 in which he implements a Z-Machine (the virtual machine
