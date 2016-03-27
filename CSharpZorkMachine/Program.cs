@@ -27,10 +27,23 @@ namespace CSharpZorkMachine
             char[] toPrint = Zchar.DecodeFromZString(story, minizork).ToArray();
             string printMe = new string(toPrint);
             Console.Write(printMe);
+            Console.WriteLine("Now reading every abbreviation in order");
 
+            for(int i = 0; i < 96; i++)
+            {
+                AbbreviationNumber num = new AbbreviationNumber(i);
+                var zchars = Zchar.ReadAbbrevTillBreak(num, minizork);
+                var normalChars = Zchar.DecodeFromZString(zchars, minizork, false)
+                    .ToArray();
+                Console.WriteLine($"Abbrev number {i} : {new string(normalChars)}");
+            }
 
             Console.ReadKey();
         }
+
+
+
+
 
         private static void ReadFromAbbrTable(string pathToMiniZork)
         {

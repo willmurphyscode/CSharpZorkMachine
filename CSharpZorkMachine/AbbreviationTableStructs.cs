@@ -44,7 +44,7 @@ namespace CSharpZorkMachine
             AbbreviationTableBase basePtr = new AbbreviationTableBase(memory);
             WordAddress addressOfPtrToAbbrTable = new WordAddress(24);
             WordAddress ptrToAbbrevTable = new WordAddress(memory.ReadWord(addressOfPtrToAbbrTable).Value);
-            WordAddress ptrToChosenAbbrv = ptrToAbbrevTable + ( number.Value * 2);
+            WordAddress ptrToChosenAbbrv = ptrToAbbrevTable + ( number.Value );
             WordAddress decompressedAbbrvPtr = new WordAddress(memory.ReadWord(ptrToChosenAbbrv).Value * 2);
             return decompressedAbbrvPtr;
         }
@@ -117,7 +117,29 @@ namespace CSharpZorkMachine
             char[] values = chars.Select(ch => Lower[ch.Value]).ToArray();
             return new string(values);
         }
-        
+
+        private static AbbreviationNumber GetFromZcharAndState(state st, Zchar value)
+        {
+            // 32(z-1)+x 
+            int z = 0; 
+            switch(st)
+            {
+                case state.abbr:
+                    z = 1;
+                    break;
+                case state.abbr32:
+                    z = 2;
+                    break;
+                case state.abbr64:
+                    z = 3;
+                    break;
+                default:
+                    throw new ArgumentException("Apparently invalid state");
+            }
+            int x = value.Value;
+            return new AbbreviationNumber(32 * (z - 1) + x);
+        }
+
         public static IEnumerable<char> DecodeFromZString(IEnumerable<Zchar> chars, GameMemory memory, bool permitRecurse = true)
         {
             //THIS IS the least functional-style code in here. it's so stateful. (well, it's a state machine)
@@ -128,37 +150,62 @@ namespace CSharpZorkMachine
             state current = state.lower;
             foreach(Zchar ch in chars)
             {
-                if(ch.Value >= lowEntry)
+                if(ch.Value >= lowEntry || ch.Value == 0)
                 {
                     switch(current)
                     {
                         case state.abbr:
-                            AbbreviationNumber num = new AbbreviationNumber(ch.Value);
+                            AbbreviationNumber num = GetFromZcharAndState(current, ch);
                             IEnumerable<Zchar> abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             IEnumerable<char> inner = DecodeFromZString(abbrevs, memory, false).ToList(); 
+                            //TODO after fixing abbreviation number bug, remove brackets
+                            foreach(char tmp in "[[".ToCharArray())
+                            {
+                                yield return tmp; 
+                            }
                             foreach(char innerChar in inner)
                             {
                                 yield return innerChar; 
                             }
+                            foreach(char tmp in "]]".ToCharArray())
+                            {
+                                yield return tmp; 
+                            }
                             current = state.lower; 
                             break; 
                         case state.abbr32:
-                            num = new AbbreviationNumber(ch.Value + 32);
+                            num = GetFromZcharAndState(current, ch);
                             abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            foreach (char tmp in "[[".ToCharArray())
+                            {
+                                yield return tmp;
+                            }
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
                             }
+                            foreach (char tmp in "]]".ToCharArray())
+                            {
+                                yield return tmp;
+                            }
                             current = state.lower;
                             break;
                         case state.abbr64:
-                            num = new AbbreviationNumber(ch.Value + 64);
+                            num = GetFromZcharAndState(current, ch);
                             abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            foreach (char tmp in "[[".ToCharArray())
+                            {
+                                yield return tmp;
+                            }
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
+                            }
+                            foreach (char tmp in "]]".ToCharArray())
+                            {
+                                yield return tmp;
                             }
                             current = state.lower;
                             break;
@@ -225,7 +272,7 @@ namespace CSharpZorkMachine
                             current = state.symbol;
                             break;
                         case 0:
-                            yield return ' ';
+                            //yield return ' ';
                             break;
                         default:
                             throw new ArgumentException("Invalid state.");

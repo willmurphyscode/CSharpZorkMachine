@@ -27,5 +27,11 @@ namespace CSharpZorkMachine.Tests
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        public void Abreviation32YieldsExpectedValueFromMiniZork()
+        {
+
+        }
+
     }
 }
