@@ -11,17 +11,17 @@ namespace CSharpZorkMachine
     /// </summary>
     public struct AbbreviationNumber
     {
-        const int abbreviationTableLength = 96; 
+        const int abbreviationTableLength = 96;
         private int value;
         public AbbreviationNumber(int value)
         {
-            if(0 > value || value >= abbreviationTableLength)
+            if (0 > value || value >= abbreviationTableLength)
             {
                 throw new ArgumentException("value is out of range.");
             }
-            this.value = value; 
+            this.value = value;
         }
-        public int Value { get { return this.value; }  }
+        public int Value { get { return this.value; } }
     }
     /// <summary>
     /// I believe this struct is just to hold a pointer
@@ -44,7 +44,7 @@ namespace CSharpZorkMachine
             AbbreviationTableBase basePtr = new AbbreviationTableBase(memory);
             WordAddress addressOfPtrToAbbrTable = new WordAddress(24);
             WordAddress ptrToAbbrevTable = new WordAddress(memory.ReadWord(addressOfPtrToAbbrTable).Value);
-            WordAddress ptrToChosenAbbrv = ptrToAbbrevTable + ( number.Value );
+            WordAddress ptrToChosenAbbrv = ptrToAbbrevTable + (number.Value);
             WordAddress decompressedAbbrvPtr = new WordAddress(memory.ReadWord(ptrToChosenAbbrv).Value * 2);
             return decompressedAbbrvPtr;
         }
@@ -57,12 +57,12 @@ namespace CSharpZorkMachine
     /// </summary>
     public struct WordZstringAddress
     {
-        private int value; 
+        private int value;
         public WordZstringAddress(int value)
         {
-            this.value = value; 
+            this.value = value;
         }
-        public int Value { get { return this.value;  } }
+        public int Value { get { return this.value; } }
     }
     /// <summary>
     /// This is an uncompressed 17-bit pointer produced 
@@ -106,7 +106,7 @@ namespace CSharpZorkMachine
         private int value;
         private static char[] Lower = { ' ', '?', '?', '?', '?', '?', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
         private static char[] Upper = { ' ', '?', '?', '?', '?', '?', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-        private static char[] Symbol = { ' ', '?', '?', '?', '?', '?', '?', '\n', '0', '1', '2', '3', '4', '5', '6', '7','8', '9', '.', ',', '!', '?', '_', '#', '\'', '"', '/', '\\', '-', ':', '(', ')' }; 
+        private static char[] Symbol = { ' ', '?', '?', '?', '?', '?', '?', '\n', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', '!', '?', '_', '#', '\'', '"', '/', '\\', '-', ':', '(', ')' };
         public Zchar(int value)
         {
             this.value = value;
@@ -121,8 +121,8 @@ namespace CSharpZorkMachine
         private static AbbreviationNumber GetFromZcharAndState(state st, Zchar value)
         {
             // 32(z-1)+x 
-            int z = 0; 
-            switch(st)
+            int z = 0;
+            switch (st)
             {
                 case state.abbr:
                     z = 1;
@@ -145,34 +145,53 @@ namespace CSharpZorkMachine
             //THIS IS the least functional-style code in here. it's so stateful. (well, it's a state machine)
             //another way would be to write a function that 
             //takes a state and a zchar and decides what to do. 
+            const int ZCHAR_PER_ABBREV = 6;
             const int lowEntry = 6;
             Zchar? previous = null;
             state current = state.lower;
             int ixCounter = 0; //TEMP DELME
-            foreach(Zchar ch in chars)
+            int fivesToSkip = 0;
+            foreach (Zchar ch in chars)
             {
-                ixCounter++; 
-                if(ch.Value >= lowEntry || ch.Value == 0)
+                ixCounter++;
+
+
+                if (ch.Value >= lowEntry || ch.Value == 0)
                 {
-                    switch(current)
+                    switch (current)
                     {
                         case state.abbr:
                             AbbreviationNumber num = GetFromZcharAndState(current, ch);
                             IEnumerable<Zchar> abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
-                            IEnumerable<char> inner = DecodeFromZString(abbrevs, memory, false).ToList(); 
-                            foreach(char innerChar in inner)
+                            List<char> inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            fivesToSkip = ZCHAR_PER_ABBREV - inner.Count - 1;
+                            foreach (char innerChar in inner)
                             {
-                                yield return innerChar; 
+                                yield return innerChar;
                             }
-                            current = state.lower; 
-                            break; 
+                            if(fivesToSkip > 0)
+                            {
+                                current = state.lower;
+                                fivesToSkip--;
+                                continue; 
+                            }
+
+                            current = state.lower;
+                            break;
                         case state.abbr32:
                             num = GetFromZcharAndState(current, ch);
                             abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            fivesToSkip = ZCHAR_PER_ABBREV - inner.Count - 1;
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
+                            }
+                            if (fivesToSkip > 0)
+                            {
+                                current = state.lower;
+                                fivesToSkip--;
+                                continue;
                             }
                             current = state.lower;
                             break;
@@ -180,21 +199,30 @@ namespace CSharpZorkMachine
                             num = GetFromZcharAndState(current, ch);
                             abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             inner = DecodeFromZString(abbrevs, memory, false).ToList();
+                            fivesToSkip = ZCHAR_PER_ABBREV - inner.Count - 1;
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
                             }
+                            if (fivesToSkip > 0)
+                            {
+                                current = state.lower;
+                                fivesToSkip--;
+                                continue;
+                            }
                             current = state.lower;
                             break;
                         case state.lower:
+                            Console.Write(Lower[ch.Value]);
                             yield return Lower[ch.Value];
                             break;
                         case state.upper:
                             current = state.lower;
+                            Console.Write(Upper[ch.Value]);
                             yield return Upper[ch.Value];
                             break;
                         case state.symbol:
-                            if(ch.Value == 6)
+                            if (ch.Value == 6)
                             {
                                 current = state.ascii;
                                 continue;
@@ -202,7 +230,8 @@ namespace CSharpZorkMachine
                             else
                             {
                                 current = state.lower;
-                                yield return Symbol[ch.Value]; 
+                                Console.Write(Symbol[ch.Value]);
+                                yield return Symbol[ch.Value];
                             }
                             break;
                         case state.ascii:
@@ -214,18 +243,18 @@ namespace CSharpZorkMachine
                             //TODO the previous char and the current char
                             // are combined to make an ascii char
                             // not in the tables. 
-                            break; 
+                            break;
                     }
                 }
                 else
                 {
-                    switch(ch.Value)
+                    switch (ch.Value)
                     {
                         case 1:
                             current = state.abbr;
-                            if(!permitRecurse)
+                            if (!permitRecurse)
                             {
-                                yield break; 
+                                yield break;
                             }
                             break;
                         case 2:
@@ -241,12 +270,21 @@ namespace CSharpZorkMachine
                             {
                                 yield break;
                             }
-                            break; 
+                            break;
                         case 4:
                             current = state.upper;
                             break;
                         case 5:
+                            //TODO if we're in the abbreviation, 5s do nothing.
+                            //if(fivesToSkip > 0)
+                            //{
+                            //    fivesToSkip--;
+                            //    current = state.lower;
+                            //    break; 
+                            //}
+
                             current = state.symbol;
+
                             break;
                         case 0:
                             //yield return ' ';
@@ -271,9 +309,9 @@ namespace CSharpZorkMachine
                 {
                     yield return ch;
                 }
-                if(word.IsTerminal())
+                if (word.IsTerminal())
                 {
-                    yield break; 
+                    yield break;
                 }
                 address = address + 1;
                 word = memory.ReadWord(address);
@@ -282,7 +320,7 @@ namespace CSharpZorkMachine
 
         public static string PrintWordAsZchars(Word word)
         {
-            return Zchar.PrintFromZchar(ReadWordAsZchars(word)); 
+            return Zchar.PrintFromZchar(ReadWordAsZchars(word));
         }
 
         public static IEnumerable<Zchar> ReadWordAsZchars(Word word)
@@ -311,12 +349,12 @@ namespace CSharpZorkMachine
                 Zchar high = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
                 yield return low;
                 yield return mid;
-                yield return high; 
-                if(word.IsTerminal(breakers))
+                yield return high;
+                if (word.IsTerminal(breakers))
                 {
-                    yield break; 
+                    yield break;
                 }
-                address = address + 1; 
+                address = address + 1;
             }
 
 
@@ -325,7 +363,7 @@ namespace CSharpZorkMachine
         public static string DiagnosticPrintFromZchar(IEnumerable<Zchar> chars)
         {
             StringBuilder retval = new StringBuilder();
-            foreach(Zchar ch in chars)
+            foreach (Zchar ch in chars)
             {
                 retval.Append($"{ch.Value.ToString("X")} {Lower[ch.Value]} |");
             }

@@ -52,6 +52,7 @@
     <Compile Include="Bits.cs" />
     <Compile Include="BitSize.cs" />
     <Compile Include="ByteAddress.cs" />
+    <Compile Include="DictionaryHelper.cs" />
     <Compile Include="GameMemory.cs" />
     <Compile Include="ImmutableByteWrapper.cs" />
     <Compile Include="Program.cs" />
