@@ -148,8 +148,10 @@ namespace CSharpZorkMachine
             const int lowEntry = 6;
             Zchar? previous = null;
             state current = state.lower;
+            int ixCounter = 0; //TEMP DELME
             foreach(Zchar ch in chars)
             {
+                ixCounter++; 
                 if(ch.Value >= lowEntry || ch.Value == 0)
                 {
                     switch(current)
@@ -158,18 +160,9 @@ namespace CSharpZorkMachine
                             AbbreviationNumber num = GetFromZcharAndState(current, ch);
                             IEnumerable<Zchar> abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             IEnumerable<char> inner = DecodeFromZString(abbrevs, memory, false).ToList(); 
-                            //TODO after fixing abbreviation number bug, remove brackets
-                            foreach(char tmp in "[[".ToCharArray())
-                            {
-                                yield return tmp; 
-                            }
                             foreach(char innerChar in inner)
                             {
                                 yield return innerChar; 
-                            }
-                            foreach(char tmp in "]]".ToCharArray())
-                            {
-                                yield return tmp; 
                             }
                             current = state.lower; 
                             break; 
@@ -177,17 +170,9 @@ namespace CSharpZorkMachine
                             num = GetFromZcharAndState(current, ch);
                             abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             inner = DecodeFromZString(abbrevs, memory, false).ToList();
-                            foreach (char tmp in "[[".ToCharArray())
-                            {
-                                yield return tmp;
-                            }
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
-                            }
-                            foreach (char tmp in "]]".ToCharArray())
-                            {
-                                yield return tmp;
                             }
                             current = state.lower;
                             break;
@@ -195,17 +180,9 @@ namespace CSharpZorkMachine
                             num = GetFromZcharAndState(current, ch);
                             abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             inner = DecodeFromZString(abbrevs, memory, false).ToList();
-                            foreach (char tmp in "[[".ToCharArray())
-                            {
-                                yield return tmp;
-                            }
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
-                            }
-                            foreach (char tmp in "]]".ToCharArray())
-                            {
-                                yield return tmp;
                             }
                             current = state.lower;
                             break;
@@ -305,11 +282,15 @@ namespace CSharpZorkMachine
 
         public static string PrintWordAsZchars(Word word)
         {
+            return Zchar.PrintFromZchar(ReadWordAsZchars(word)); 
+        }
+
+        public static IEnumerable<Zchar> ReadWordAsZchars(Word word)
+        {
             Zchar low = new Zchar(Bits.FetchBits(BitNumber.Bit14, BitSize.Size5, word));
             Zchar mid = new Zchar(Bits.FetchBits(BitNumber.Bit9, BitSize.Size5, word));
             Zchar high = new Zchar(Bits.FetchBits(BitNumber.Bit4, BitSize.Size5, word));
-
-            return Zchar.PrintFromZchar(new List<Zchar> { low, mid, high }); 
+            return new Zchar[] { low, mid, high };
         }
 
         public static IEnumerable<Zchar> ReadAbbrevTillBreak(AbbreviationNumber num, GameMemory memory)
@@ -320,7 +301,7 @@ namespace CSharpZorkMachine
             return ReadWordsTillBreak(ptrChosenAbbrev, memory);
         }
 
-        public static IEnumerable<Zchar> ReadWordsTillBreak(WordAddress address, GameMemory memory)
+        public static IEnumerable<Zchar> ReadWordsTillBreak(WordAddress address, GameMemory memory, ISet<char> breakers = null)
         {
             while (true)
             {
@@ -331,7 +312,7 @@ namespace CSharpZorkMachine
                 yield return low;
                 yield return mid;
                 yield return high; 
-                if(word.IsTerminal())
+                if(word.IsTerminal(breakers))
                 {
                     yield break; 
                 }
@@ -341,7 +322,7 @@ namespace CSharpZorkMachine
 
         }
 
-        public static string DiagnosticPringFromZchar(IEnumerable<Zchar> chars)
+        public static string DiagnosticPrintFromZchar(IEnumerable<Zchar> chars)
         {
             StringBuilder retval = new StringBuilder();
             foreach(Zchar ch in chars)

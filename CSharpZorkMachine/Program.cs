@@ -10,9 +10,31 @@ namespace CSharpZorkMachine
     {
         static void Main(string[] args)
         {
+            string pathToMiniZork = @"..\..\..\minizork.z3";
+            GameMemory minizork = GameMemory.OpenFile(pathToMiniZork);
+            WordAddress testText = new WordAddress(0xb106);
+            IEnumerable<Zchar> story = Zchar.ReadWordsTillBreak(testText, minizork);
+            char[] toPrint = Zchar.DecodeFromZString(story, minizork).ToArray();
+            string printMe = new string(toPrint);
+            Console.Write(printMe);
+
+            DictionaryHelper dictionary = new DictionaryHelper();
+
+            List<string> nEntries = new List<string>();
+            int n = 10; 
+            for(int i = 0; i < n; i++ )
+            {
+                string entry = dictionary.ReadNthEntry(i, minizork);
+                nEntries.Add(entry);
+            }
+
+            nEntries.ForEach(e => Console.WriteLine(e)); 
+
+
+
+
             TestMemoryBase();
             TestReadingAndWritingGameState();
-            string pathToMiniZork = @"..\..\..\minizork.z3";
             TestReadVersionNumberFromFile(pathToMiniZork);
 
 
@@ -21,12 +43,7 @@ namespace CSharpZorkMachine
             //19 t 0d h 0a e 00 _ 05 ? 05 ?
             //1e y 14 o 1a u 17 r 00 _ 05 ?
             ReadFromAbbrTable(pathToMiniZork);
-            GameMemory minizork = GameMemory.OpenFile(pathToMiniZork);
-            WordAddress testText = new WordAddress(0xb106);
-            IEnumerable<Zchar> story = Zchar.ReadWordsTillBreak(testText, minizork);
-            char[] toPrint = Zchar.DecodeFromZString(story, minizork).ToArray();
-            string printMe = new string(toPrint);
-            Console.Write(printMe);
+
             Console.WriteLine("Now reading every abbreviation in order");
 
             for(int i = 0; i < 96; i++)
@@ -81,7 +98,7 @@ namespace CSharpZorkMachine
         {
             GameMemory miniZork = GameMemory.OpenFile(pathToMiniZork);
             ByteAddress versionAddress = new ByteAddress(0);
-            byte versionNumber = miniZork.ReadAddress(versionAddress);
+            byte versionNumber = miniZork.ReadByte(versionAddress);
             Console.WriteLine($"Mini-Zork version {versionNumber}");
         }
 
@@ -105,7 +122,7 @@ namespace CSharpZorkMachine
                 .Select(el => new ByteAddress(el));
 
             byte[] firstTenBytes = firstTenByteAddress
-                .Select(p => gameState.ReadAddress(p))
+                .Select(p => gameState.ReadByte(p))
                 .ToArray();
 
             byte[] firstFiveWords = firstFivePointers
@@ -136,7 +153,7 @@ namespace CSharpZorkMachine
                 .ForEach(item => gameState.WriteByte(item.address, item.val));
 
             byte[] firstTenBytesAgain = firstTenByteAddress
-                .Select(p => gameState.ReadAddress(p))
+                .Select(p => gameState.ReadByte(p))
                 .ToArray();
 
             string mutated = new string(Encoding.UTF8.GetChars(firstTenBytesAgain));
@@ -152,7 +169,7 @@ namespace CSharpZorkMachine
             }
              
             byte[] firstTenBytesAgain2 = firstTenByteAddress
-                .Select(p => gameState.ReadAddress(p))
+                .Select(p => gameState.ReadByte(p))
                 .ToArray();
 
             string mutated2 = new string(Encoding.UTF8.GetChars(firstTenBytesAgain2)); 

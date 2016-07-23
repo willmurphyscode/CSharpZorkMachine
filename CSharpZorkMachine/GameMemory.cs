@@ -48,7 +48,7 @@ namespace CSharpZorkMachine
         }
 
 
-        public byte ReadAddress(ByteAddress address)
+        public byte ReadByte(ByteAddress address)
         {
             if(this.dynamicState.IsInRange(address))
             {
@@ -64,8 +64,8 @@ namespace CSharpZorkMachine
         {
             ByteAddress highByteAddress = Bits.AddressOfHighByte(address);
             ByteAddress lowByteAddress = Bits.AddressOfLowByte(address);
-            byte high = ReadAddress(highByteAddress);
-            byte low = ReadAddress(lowByteAddress);
+            byte high = ReadByte(highByteAddress);
+            byte low = ReadByte(lowByteAddress);
 
             return new Word((256 * high) + low); 
         }
@@ -75,7 +75,7 @@ namespace CSharpZorkMachine
         {
             get
             {
-                return this.ReadAddress(address);
+                return this.ReadByte(address);
             }
         }
 
