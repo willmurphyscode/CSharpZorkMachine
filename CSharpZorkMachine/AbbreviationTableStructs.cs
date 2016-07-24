@@ -155,8 +155,14 @@ namespace CSharpZorkMachine
             {
                 ixCounter++;
 
+                bool isAbbrev = current == state.abbr || current == state.abbr32 || current == state.abbr64;
+                if(isAbbrev && ch.Value <= 5)
+                {
+                    int a = 3; 
 
-                if (ch.Value >= lowEntry || ch.Value == 0)
+                }
+
+                if ((ch.Value >= lowEntry || ch.Value == 0)|| (/*ch.Value == 5 &&*/ isAbbrev))
                 {
                     switch (current)
                     {
