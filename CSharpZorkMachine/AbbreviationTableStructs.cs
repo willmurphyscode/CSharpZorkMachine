@@ -156,11 +156,6 @@ namespace CSharpZorkMachine
                 ixCounter++;
 
                 bool isAbbrev = current == state.abbr || current == state.abbr32 || current == state.abbr64;
-                if(isAbbrev && ch.Value <= 5)
-                {
-                    int a = 3; 
-
-                }
 
                 if ((ch.Value >= lowEntry || ch.Value == 0)|| (/*ch.Value == 5 &&*/ isAbbrev))
                 {
@@ -173,6 +168,7 @@ namespace CSharpZorkMachine
                             IEnumerable<Zchar> abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             List<char> inner = DecodeFromZString(abbrevs, memory, false).ToList();
                             fivesToSkip = ZCHAR_PER_ABBREV - inner.Count - 1;
+
                             foreach (char innerChar in inner)
                             {
                                 yield return innerChar;
@@ -249,19 +245,9 @@ namespace CSharpZorkMachine
                             current = state.upper;
                             break;
                         case 5:
-                            //TODO if we're in the abbreviation, 5s do nothing.
-                            //if(fivesToSkip > 0)
-                            //{
-                            //    fivesToSkip--;
-                            //    current = state.lower;
-                            //    break; 
-                            //}
-
                             current = state.symbol;
-
                             break;
                         case 0:
-                            //yield return ' ';
                             break;
                         default:
                             throw new ArgumentException("Invalid state.");
