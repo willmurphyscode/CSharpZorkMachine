@@ -167,6 +167,8 @@ namespace CSharpZorkMachine
                     switch (current)
                     {
                         case state.abbr:
+                        case state.abbr32:
+                        case state.abbr64:
                             AbbreviationNumber num = GetFromZcharAndState(current, ch);
                             IEnumerable<Zchar> abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
                             List<char> inner = DecodeFromZString(abbrevs, memory, false).ToList();
@@ -182,40 +184,6 @@ namespace CSharpZorkMachine
                                 continue; 
                             }
 
-                            current = state.lower;
-                            break;
-                        case state.abbr32:
-                            num = GetFromZcharAndState(current, ch);
-                            abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
-                            inner = DecodeFromZString(abbrevs, memory, false).ToList();
-                            fivesToSkip = ZCHAR_PER_ABBREV - inner.Count - 1;
-                            foreach (char innerChar in inner)
-                            {
-                                yield return innerChar;
-                            }
-                            if (fivesToSkip > 0)
-                            {
-                                current = state.lower;
-                                fivesToSkip--;
-                                continue;
-                            }
-                            current = state.lower;
-                            break;
-                        case state.abbr64:
-                            num = GetFromZcharAndState(current, ch);
-                            abbrevs = ReadAbbrevTillBreak(num, memory).ToList();
-                            inner = DecodeFromZString(abbrevs, memory, false).ToList();
-                            fivesToSkip = ZCHAR_PER_ABBREV - inner.Count - 1;
-                            foreach (char innerChar in inner)
-                            {
-                                yield return innerChar;
-                            }
-                            if (fivesToSkip > 0)
-                            {
-                                current = state.lower;
-                                fivesToSkip--;
-                                continue;
-                            }
                             current = state.lower;
                             break;
                         case state.lower:
