@@ -12,26 +12,29 @@ namespace CSharpZorkMachine
         {
             string pathToMiniZork = @"..\..\..\minizork.z3";
             GameMemory minizork = GameMemory.OpenFile(pathToMiniZork);
-            WordAddress testText = new WordAddress(0xb106);
-            IEnumerable<Zchar> story = Zchar.ReadWordsTillBreak(testText, minizork);
-            char[] toPrint = Zchar.DecodeFromZString(story, minizork).ToArray();
-            string printMe = new string(toPrint);
-            Console.Write(printMe);
+
+            ReadDictionaryTillBreak(minizork);
 
             DictionaryHelper dictionary = new DictionaryHelper();
+
+            Console.WriteLine($"Dictionary is expected to have {dictionary.CountOfEntries(minizork)} entries");
 
             List<string> nEntries = new List<string>();
             int n = 10; 
             for(int i = 0; i < n; i++ )
             {
-                string entry = dictionary.ReadNthEntry(i, minizork);
+                string entry = dictionary.ReadNthEntry(i, minizork).Print;
                 nEntries.Add(entry);
             }
 
-            nEntries.ForEach(e => Console.WriteLine(e)); 
+            nEntries.ForEach(e => Console.WriteLine(e));
 
 
-
+            WordAddress testText = new WordAddress(0xb106);
+            IEnumerable<Zchar> story = Zchar.ReadWordsTillBreak(testText, minizork);
+            char[] toPrint = Zchar.DecodeFromZString(story, minizork).ToArray();
+            string printMe = new string(toPrint);
+            Console.Write(printMe);
 
             TestMemoryBase();
             TestReadingAndWritingGameState();
@@ -56,6 +59,21 @@ namespace CSharpZorkMachine
             }
 
             Console.ReadKey();
+        }
+
+        private static void ReadDictionaryTillBreak(GameMemory zorkFile)
+        {
+            DictionaryHelper dictionary = new DictionaryHelper();
+
+            WordAddress startOfEntries = dictionary.GetOffSetOfNthEntry(0, zorkFile);
+            WordAddress ptrFirstEntry = new WordAddress(startOfEntries.Value);
+
+            var test = Zchar.ReadWordsTillBreak(ptrFirstEntry, zorkFile);
+            char[] result = Zchar.DecodeFromZString(test, zorkFile, permitRecurse: false)
+                .ToArray();
+
+            Console.Write(new string(result)); 
+
         }
 
 
