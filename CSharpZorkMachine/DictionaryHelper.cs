@@ -40,7 +40,7 @@ namespace CSharpZorkMachine
                                     sizeOfSizeEntry + 
                                     sizeOfEntryCountEntry;
 
-            ByteAddress ptrSizeEntry = new ByteAddress(startOfDictionary.Value + numberOfSeps + 1);
+            ByteAddress ptrSizeEntry = new ByteAddress(startOfDictionary.Value + numberOfSeps + sizeOfSepCountEntry);
             int sizeOfEntry = zorkFile.ReadByte(ptrSizeEntry);
 
             return new WordAddress(offsetFirstEntry + (n * sizeOfEntry));
@@ -118,6 +118,9 @@ namespace CSharpZorkMachine
         public ISet<char> Separators(GameMemory zorkFile)
         {
             //TODO read separators from dictionary. 
+            int countSeparators = CountOfSeparatorCharacters(zorkFile);
+
+
             return new HashSet<char>(new char[] { ' ' });
         }
 

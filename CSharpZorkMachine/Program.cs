@@ -18,16 +18,17 @@ namespace CSharpZorkMachine
             DictionaryHelper dictionary = new DictionaryHelper();
 
             Console.WriteLine($"Dictionary is expected to have {dictionary.CountOfEntries(minizork)} entries");
+            string expectedFirst10EntriesString = "$ve . , #comm #rand #reco #unre \" a about";
+            string[] expectedFirst10Entries = expectedFirst10EntriesString.Split(' ');
 
             List<string> nEntries = new List<string>();
             int n = 10; 
             for(int i = 0; i < n; i++ )
             {
                 string entry = dictionary.ReadNthEntry(i, minizork).Print;
-                nEntries.Add(entry);
+                Console.WriteLine($"Expected: {expectedFirst10Entries[i]}, Found: {entry}");
             }
 
-            nEntries.ForEach(e => Console.WriteLine(e));
 
 
             WordAddress testText = new WordAddress(0xb106);
