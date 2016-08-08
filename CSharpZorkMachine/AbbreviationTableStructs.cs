@@ -183,12 +183,12 @@ namespace CSharpZorkMachine
                             current = state.lower;
                             break;
                         case state.lower:
-                            Console.Write(Lower[ch.Value]);
+                            //Console.Write(Lower[ch.Value]);
                             yield return Lower[ch.Value];
                             break;
                         case state.upper:
                             current = state.lower;
-                            Console.Write(Upper[ch.Value]);
+                            //Console.Write(Upper[ch.Value]);
                             yield return Upper[ch.Value];
                             break;
                         case state.symbol:
@@ -200,7 +200,7 @@ namespace CSharpZorkMachine
                             else
                             {
                                 current = state.lower;
-                                Console.Write(Symbol[ch.Value]);
+                                //Console.Write(Symbol[ch.Value]);
                                 yield return Symbol[ch.Value];
                             }
                             break;
@@ -224,21 +224,21 @@ namespace CSharpZorkMachine
                             current = state.abbr;
                             if (!permitRecurse)
                             {
-                                yield break;
+                                //yield break;
                             }
                             break;
                         case 2:
                             current = state.abbr32;
                             if (!permitRecurse)
                             {
-                                yield break;
+                                //yield break;
                             }
                             break;
                         case 3:
                             current = state.abbr64;
                             if (!permitRecurse)
                             {
-                                yield break;
+                                //yield break;
                             }
                             break;
                         case 4:

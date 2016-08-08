@@ -119,7 +119,7 @@ namespace CSharpZorkMachine
         {
             //TODO read separators from dictionary. 
             int countSeparators = CountOfSeparatorCharacters(zorkFile);
-
+            ByteAddress startOfDictionary = ptrToDictionary(zorkFile);
 
             return new HashSet<char>(new char[] { ' ' });
         }
