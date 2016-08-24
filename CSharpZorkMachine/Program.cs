@@ -13,7 +13,7 @@ namespace CSharpZorkMachine
             string pathToMiniZork = @"..\..\..\minizork.z3";
             GameMemory minizork = GameMemory.OpenFile(pathToMiniZork);
 
-            ReadDictionaryTillBreak(minizork);
+            //ReadDictionaryTillBreak(minizork);
 
             DictionaryHelper dictionary = new DictionaryHelper();
 
@@ -26,7 +26,7 @@ namespace CSharpZorkMachine
             for(int i = 0; i < n; i++ )
             {
                 string entry = dictionary.ReadNthEntry(i, minizork).Print;
-                Console.WriteLine($"Expected: {expectedFirst10Entries[i]}, Found: {entry}");
+                Console.WriteLine($"Expected: {expectedFirst10Entries[i]} but Found: {entry}");
             }
 
 

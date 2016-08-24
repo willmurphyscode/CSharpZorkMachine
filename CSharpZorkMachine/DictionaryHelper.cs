@@ -46,7 +46,19 @@ namespace CSharpZorkMachine
             return new WordAddress(offsetFirstEntry + (n * sizeOfEntry));
         }
 
-        public int GetEntrySizeInBytes(GameMemory zorkFile )
+        public int GetEntrySizeInBytes(int n, GameMemory zorkFile)
+        {
+            if (IsNthEntryADictionaryWord(n))
+            {
+               return 4;
+            }
+            else
+            {
+                return ReadCustomSizeFromFile(zorkFile);
+            }
+        }
+
+        private int ReadCustomSizeFromFile(GameMemory zorkFile)
         {
             ByteAddress startOfDictionary = ptrToDictionary(zorkFile);
             int numberOfSeps = CountOfSeparatorCharacters(zorkFile);
@@ -58,9 +70,23 @@ namespace CSharpZorkMachine
 
         public Word[] GetContentsOfNthEntry(int n, GameMemory zorkFile)
         {
-            int entrySize = GetEntrySizeInBytes(zorkFile);
-            int entrySizeInWords = entrySize / 2;
+            int entrySize =  GetEntrySizeInBytes(n, zorkFile);
 
+            // I have been assuming that the above call will return 4, since that
+            // is how many bytes are in a word entry. But it think this size 
+            // allows there to be arbitrary entries after all the words, and they might
+            // be of up to this size. 
+
+            // Two questions:
+
+            // 1. How do I know that we are in the size-regulated, has words-in-order
+            // part of the dictionary? 
+
+            // 2. How do I know the size of the entries that are after the words,
+            // in the arbitrary-sized part of the table? 
+
+            int entrySizeInWords = entrySize / 2;
+            
             Word[] retval = new Word[entrySizeInWords];
             WordAddress ptrStartOfEntry = GetOffSetOfNthEntry(n, zorkFile);
 
@@ -72,6 +98,12 @@ namespace CSharpZorkMachine
 
 
             return retval; 
+        }
+
+        private bool IsNthEntryADictionaryWord(int n)
+        {
+            //TODO actually implement
+            return true; 
         }
 
         public DictionaryEntry ReadNthEntry(int n, GameMemory zorkFile)

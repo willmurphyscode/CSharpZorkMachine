@@ -156,8 +156,8 @@ namespace CSharpZorkMachine
                 ixCounter++;
 
                 bool isAbbrev = current == state.abbr || current == state.abbr32 || current == state.abbr64;
-
-                if ((ch.Value >= lowEntry || ch.Value == 0)|| (/*ch.Value == 5 &&*/ isAbbrev))
+                bool isAscii = current == state.ascii || current == state.ascii2;
+                if ((ch.Value >= lowEntry || ch.Value == 0)|| (isAbbrev) || (isAscii))
                 {
                     switch (current)
                     {
@@ -209,7 +209,7 @@ namespace CSharpZorkMachine
                             current = state.ascii2;
                             continue;
                         case state.ascii2:
-                            throw new System.NotImplementedException();
+                            //throw new System.NotImplementedException();
                             //TODO the previous char and the current char
                             // are combined to make an ascii char
                             // not in the tables. 
